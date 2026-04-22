@@ -57,7 +57,7 @@ export function Landing({ onImageLoaded }: Props) {
           Secure Photo <em>Blur</em>
         </h1>
         <p class="landing-tagline">
-          Blur faces and sensitive areas — offline, no tracking,{' '}
+          Blur faces and sensitive areas — offline, no personal data collected,{' '}
           <a class="landing-oss-link" href={REPO_URL} target="_blank" rel="noopener noreferrer">open-source</a>.
         </p>
 
@@ -120,7 +120,7 @@ export function Landing({ onImageLoaded }: Props) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            Zero tracking
+            No personal data
           </span>
           <span class="feature-pill">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -140,7 +140,7 @@ export function Landing({ onImageLoaded }: Props) {
               <strong>Irreversible blur</strong> — Adaptive mosaic reduces faces to ~5×5 effective pixels (min block 12px; below 8px is reversible via super-resolution). Solid fill sets every pixel to R=G=B=0. Gaussian blur is rated LOW: reversible per Revelio (arXiv:2506.12344) and Fantômas (PoPETs 2024).
             </li>
             <li>
-              <strong>Network isolation</strong> — Content-Security-Policy enforces <code>connect-src 'self' blob: data:</code>, blocking all external connections. No cookies, no analytics, no tracking pixels.
+              <strong>Network isolation</strong> — Content-Security-Policy blocks all external connections except anonymous page-view analytics (Cloudflare Web Analytics — no cookies, no personal data, no tracking pixels). Your photos never leave your device.
             </li>
             <li>
               <strong>Metadata stripping</strong> — Canvas re-rendering inherently strips all EXIF/GPS data. No metadata survives export.

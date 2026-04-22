@@ -1,6 +1,6 @@
 # Secure Photo Blur
 
-Privacy-first photo anonymization — offline, open-source, zero tracking.
+Privacy-first photo anonymization — offline, open-source, no personal data collected.
 
 ## What it does
 
@@ -8,7 +8,7 @@ Blur faces and sensitive areas in photos before sharing them publicly. Automatic
 
 ## How it works
 
-The whole thing is a static web page with no backend — you can switch to airplane mode and it still works (PWA, fully offline after first load), or open DevTools → Network on desktop and see for yourself that no photos are ever uploaded. There's no tracking, no analytics, no auth; strict Content Security Policy, Referrer-Policy: no-referrer, and camera/mic/geolocation permissions are explicitly disabled. The code is open source and auditable — around 2,000 lines of Preact + TypeScript under a PolyForm Noncommercial 1.0 license — with face detection running locally through [@vladmandic/human](https://github.com/vladmandic/human) (BlazeFace), model weights bundled, no external requests at runtime.
+The whole thing is a static web page with no backend — you can switch to airplane mode and it still works (PWA, fully offline after first load), or open DevTools → Network on desktop and see for yourself that no photos are ever uploaded. There's no personal data collection, no auth; anonymous page-view analytics via Cloudflare Web Analytics (no cookies, no fingerprinting). Strict Content Security Policy, Referrer-Policy: no-referrer, and camera/mic/geolocation permissions are explicitly disabled. The code is open source and auditable — around 2,000 lines of Preact + TypeScript under a PolyForm Noncommercial 1.0 license — with face detection running locally through [@vladmandic/human](https://github.com/vladmandic/human) (BlazeFace), model weights bundled, no external requests at runtime.
 
 ## Blur methods
 
