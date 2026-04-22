@@ -130,12 +130,9 @@ export function Landing({ onImageLoaded }: Props) {
           </span>
         </div>
 
-        <details class="landing-science">
-          <summary class="science-summary-trigger">
-            <span class="science-heading">Long nerdy version</span>
-            <span class="science-expand-icon" aria-hidden="true">›</span>
-          </summary>
-          <ul class="science-details science-details--no-border">
+        <div class="landing-science">
+          <span class="science-heading">Long nerdy details</span>
+          <ul class="science-details">
             <li>
               <strong>Face detection</strong> — automatically pre-selects faces as useful starting regions; you can adjust, add, or remove any area before exporting. BlazeFace model via @vladmandic/human, GPU-accelerated (WebGL), self-hosted — no external CDN, no network calls.
             </li>
@@ -152,7 +149,7 @@ export function Landing({ onImageLoaded }: Props) {
               <strong>Open source</strong> — <a class="landing-oss-link" href={REPO_URL} target="_blank" rel="noopener noreferrer">source code on GitHub</a> for everyone to audit.
             </li>
           </ul>
-        </details>
+        </div>
 
       </main>
 
@@ -286,11 +283,7 @@ export function Landing({ onImageLoaded }: Props) {
           flex-direction: column;
           gap: var(--sp-sm);
           padding-top: var(--sp-xs);
-          border-top: 1px solid var(--border-subtle);
-        }
-        .science-details--no-border {
-          border-top: none;
-          padding-top: 0;
+          margin-top: var(--sp-sm);
         }
         .science-details li {
           font-size: 12px;
@@ -307,24 +300,6 @@ export function Landing({ onImageLoaded }: Props) {
           padding: 1px 4px;
           border-radius: 2px;
         }
-        .science-summary-trigger {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          cursor: pointer;
-          list-style: none;
-          user-select: none;
-        }
-        .science-summary-trigger::-webkit-details-marker { display: none; }
-        .science-expand-icon {
-          font-size: 14px;
-          color: var(--text-muted);
-          transform: rotate(0deg);
-          transition: transform var(--transition);
-          line-height: 1;
-        }
-        details[open] .science-expand-icon { transform: rotate(90deg); }
-        details[open] .science-details { margin-top: var(--sp-sm); }
       `}</style>
     </div>
   )
