@@ -1,6 +1,6 @@
 import { useRef, useState } from 'preact/hooks'
 
-const REPO_URL = 'https://github.com/claudiopostinghel/secure-photo-blur'
+const REPO_URL = 'https://github.com/secure-photo-blur/secure-photo-blur'
 import { loadImage } from '../engine/image-loader'
 import type { LoadedImage } from '../types'
 
