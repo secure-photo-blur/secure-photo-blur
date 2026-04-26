@@ -1,44 +1,33 @@
 import { useRef, useState } from 'preact/hooks'
 
 const REPO_URL = 'https://github.com/secure-photo-blur/secure-photo-blur'
-import { loadImage } from '../engine/image-loader'
-import type { LoadedImage } from '../types'
 
 interface Props {
-  onImageLoaded: (img: LoadedImage) => void
+  onFilesSelected: (files: File[]) => void
+  loading?: boolean
+  error?: string | null
 }
 
 const ACCEPTED = '.jpg,.jpeg,.png,.webp,.heic,.heif'
 
-export function Landing({ onImageLoaded }: Props) {
+export function Landing({ onFilesSelected, loading, error }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  async function handleFile(file: File) {
-    setError(null)
-    setLoading(true)
-    try {
-      const img = await loadImage(file)
-      onImageLoaded(img)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load image')
-    } finally {
-      setLoading(false)
-    }
+  function handleFiles(fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) return
+    const valid = Array.from(fileList).filter(f => f.type.startsWith('image/'))
+    if (valid.length > 0) onFilesSelected(valid)
   }
 
   function onInputChange(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0]
-    if (file) handleFile(file)
+    handleFiles((e.target as HTMLInputElement).files)
   }
 
   function onDrop(e: DragEvent) {
     e.preventDefault()
     setDragging(false)
-    const file = e.dataTransfer?.files[0]
-    if (file && file.type.startsWith('image/')) handleFile(file)
+    handleFiles(e.dataTransfer?.files ?? null)
   }
 
   function onDragOver(e: DragEvent) {
@@ -81,6 +70,7 @@ export function Landing({ onImageLoaded }: Props) {
             ref={inputRef}
             type="file"
             accept={ACCEPTED}
+            multiple
             onChange={onInputChange}
             style={{ display: 'none' }}
           />
@@ -96,7 +86,7 @@ export function Landing({ onImageLoaded }: Props) {
                 <polyline points="17 8 12 3 7 8"/>
                 <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              <span class="drop-zone-label">Drop or select a photo</span>
+              <span class="drop-zone-label">Drop or select photos</span>
               <button class="btn-primary" type="button" onClick={(e) => { e.stopPropagation(); inputRef.current?.click() }}>
                 Select Photo
               </button>
@@ -187,7 +177,7 @@ export function Landing({ onImageLoaded }: Props) {
         .landing-tagline {
           text-align: center;
           color: var(--text-secondary);
-          font-size: 15px;
+          font-size: var(--fs-xl);
           line-height: 1.6;
         }
         .drop-zone {
@@ -214,11 +204,11 @@ export function Landing({ onImageLoaded }: Props) {
           margin-bottom: var(--sp-xs);
         }
         .drop-zone-label {
-          font-size: 15px;
+          font-size: var(--fs-xl);
           color: var(--text-secondary);
         }
         .drop-zone-formats {
-          font-size: 12px;
+          font-size: var(--fs-base);
           color: var(--text-muted);
           margin-top: var(--sp-xs);
         }
@@ -231,7 +221,7 @@ export function Landing({ onImageLoaded }: Props) {
         }
         .landing-error {
           color: var(--accent-light);
-          font-size: 13px;
+          font-size: var(--fs-md);
           text-align: center;
         }
         .landing-features {
@@ -248,7 +238,7 @@ export function Landing({ onImageLoaded }: Props) {
           background: var(--bg-surface);
           border: 1px solid var(--border);
           border-radius: var(--radius-pill);
-          font-size: 12px;
+          font-size: var(--fs-base);
           color: var(--text-secondary);
         }
         .feature-pill svg { opacity: 0.7; }
@@ -271,7 +261,7 @@ export function Landing({ onImageLoaded }: Props) {
           gap: var(--sp-sm);
         }
         .science-heading {
-          font-size: 10px;
+          font-size: var(--fs-xs);
           font-weight: 700;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -286,7 +276,7 @@ export function Landing({ onImageLoaded }: Props) {
           margin-top: var(--sp-sm);
         }
         .science-details li {
-          font-size: 12px;
+          font-size: var(--fs-base);
           color: var(--text-muted);
           line-height: 1.6;
         }
@@ -295,7 +285,7 @@ export function Landing({ onImageLoaded }: Props) {
         }
         .science-details code {
           font-family: monospace;
-          font-size: 11px;
+          font-size: var(--fs-sm);
           background: var(--bg-elevated);
           padding: 1px 4px;
           border-radius: 2px;

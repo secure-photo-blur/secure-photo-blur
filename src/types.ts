@@ -62,6 +62,34 @@ export interface FaceDetectionResult {
 
 export type ExportFormat = 'jpeg' | 'png'
 
+export interface FaceEntry {
+  face: FaceDetectionResult
+  visible: boolean
+  angle: number
+  shape: RegionShape
+}
+
+export interface RectEntry {
+  rect: Rect
+  method: BlurMethod
+  angle: number
+  visible: boolean
+  shape: RegionShape
+}
+
+export interface ImageEditState {
+  faces: FaceEntry[]
+  rects: RectEntry[]
+  exported: boolean
+}
+
+export interface QueueItem {
+  file: File
+  loaded: LoadedImage | null
+  editState: ImageEditState | null
+  error: string | null
+}
+
 export interface SecurityInfo {
   method: BlurMethod
   label: string

@@ -1,20 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
-import type { BlurMethod, FaceDetectionResult, LoadedImage, Rect, RegionShape } from '../types'
+import type { BlurMethod, FaceEntry, LoadedImage, Rect, RectEntry } from '../types'
 import { BLUR_SECURITY } from '../types'
-
-interface FaceEntry {
-  face: FaceDetectionResult
-  visible: boolean
-  angle: number
-  shape: RegionShape
-}
-
-interface RectEntry {
-  rect: Rect
-  angle: number
-  visible: boolean
-  shape: RegionShape
-}
 
 interface Props {
   faces: FaceEntry[]
@@ -157,7 +143,7 @@ export function FaceList({
         {(() => {
           const info = BLUR_SECURITY[method]
           const isMosaicGreen = method === 'mosaic'
-          const dotColor = (info.level === 'max' || isMosaicGreen) ? '#22c55e' : info.level === 'high' ? '#f59e0b' : '#b22222'
+          const dotColor = (info.level === 'max' || isMosaicGreen) ? 'var(--color-success)' : info.level === 'high' ? 'var(--color-warning)' : 'var(--accent)'
           const levelClass = isMosaicGreen ? 'method-trigger-mini-level--max' : `method-trigger-mini-level--${info.level}`
           return (
             <button class="method-trigger-mini" type="button" onClick={onMethodClick}>
@@ -193,7 +179,7 @@ export function FaceList({
               >
                 {td
                   ? <img class="face-item-thumb" src={td.blobUrl} alt={`Face ${i + 1}`} />
-                  : <div class="face-item-thumb" style={{ background: '#1a1a1a' }} />
+                  : <div class="face-item-thumb" style={{ background: 'var(--bg-base)' }} />
                 }
                 <div class="face-item-edit-hint">
                   <IconEdit />
@@ -221,7 +207,7 @@ export function FaceList({
               >
                 {td
                   ? <img class="face-item-thumb" src={td.blobUrl} alt={`Region ${i + 1}`} />
-                  : <div class="face-item-thumb" style={{ background: '#1a1a1a' }} />
+                  : <div class="face-item-thumb" style={{ background: 'var(--bg-base)' }} />
                 }
                 <div class="face-item-edit-hint">
                   <IconEdit />
@@ -269,7 +255,7 @@ const styles = `
     align-items: center;
     gap: var(--sp-sm);
     padding: var(--sp-sm) var(--sp-md);
-    font-size: 13px;
+    font-size: var(--fs-md);
     color: var(--text-muted);
     min-height: 44px;
   }
@@ -280,7 +266,7 @@ const styles = `
     padding: var(--sp-sm) var(--sp-sm) var(--sp-xs);
   }
   .face-list-title {
-    font-size: 14px;
+    font-size: var(--fs-lg);
     color: rgba(255,255,255,0.8);
     letter-spacing: 0.08em;
     font-weight: 500;
@@ -303,15 +289,15 @@ const styles = `
     color: var(--text-primary);
   }
   .method-trigger-mini-name {
-    font-size: 13px;
+    font-size: var(--fs-md);
     font-weight: 500;
     color: var(--text-primary);
   }
   .method-trigger-mini-name--max {
-    color: #22c55e;
+    color: var(--color-success);
   }
   .method-trigger-mini-level {
-    font-size: 10px;
+    font-size: var(--fs-xs);
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -324,7 +310,7 @@ const styles = `
   }
   .method-trigger-mini-level--high {
     background: rgba(245,158,11,0.12);
-    color: #f59e0b;
+    color: var(--color-warning);
   }
   .method-trigger-mini-level--low {
     background: rgba(178,34,34,0.12);
@@ -343,14 +329,14 @@ const styles = `
     padding: 0;
     background: transparent;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-lg);
     user-select: none;
     -webkit-user-select: none;
   }
   .face-item-thumb-wrap {
     position: relative;
     display: block;
-    border-radius: 6px;
+    border-radius: var(--radius-lg);
     overflow: visible;
     border: 2px solid transparent;
     transition: border-color var(--transition);
@@ -362,7 +348,7 @@ const styles = `
     border-color: var(--accent);
   }
   .face-item--rect.face-item--active .face-item-thumb-wrap {
-    border-color: #63b3ed;
+    border-color: var(--color-info);
   }
   .face-item:not(.face-item--active) .face-item-thumb,
   .face-item:not(.face-item--active) .face-item-edit-hint {
@@ -373,7 +359,7 @@ const styles = `
     width: ${THUMB_CSS}px;
     height: ${THUMB_CSS}px;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: var(--radius);
     pointer-events: none;
   }
   .face-item-edit-hint {
@@ -383,7 +369,7 @@ const styles = `
     align-items: center;
     justify-content: center;
     background: rgba(0,0,0,0);
-    border-radius: 4px;
+    border-radius: var(--radius);
     color: #fff;
     opacity: 0;
     transition: opacity var(--transition), background var(--transition);
@@ -401,8 +387,8 @@ const styles = `
     z-index: 5;
     padding: 3px 0;
     border: none;
-    border-radius: 3px;
-    background: #dc2626;
+    border-radius: var(--radius-sm);
+    background: var(--color-error);
     color: #fff;
     font-size: 9px;
     font-weight: 600;
@@ -414,7 +400,7 @@ const styles = `
     transition: background var(--transition);
   }
   .face-item-anon-btn:hover {
-    background: #b91c1c;
+    background: var(--color-error-dark);
   }
   .face-item-anon-btn--active {
     background: rgba(120,120,120,0.75);
@@ -434,7 +420,7 @@ const styles = `
     border-radius: 50%;
     background: rgba(0,0,0,0.55);
     color: #fff;
-    font-size: 12px;
+    font-size: var(--fs-base);
     line-height: 1;
     cursor: pointer;
     display: flex;
@@ -444,22 +430,22 @@ const styles = `
     transition: background var(--transition);
   }
   .face-item-delete-btn:hover {
-    background: rgba(220,38,38,0.85);
+    background: rgba(220, 38, 38, 0.85);
   }
   .face-item-hint-box {
     flex-shrink: 0;
     width: ${THUMB_CSS}px;
     height: ${THUMB_CSS}px;
     border: 1px dashed var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: var(--sp-sm);
     padding: var(--sp-sm);
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: var(--fs-sm);
     line-height: 1.35;
     text-align: center;
     pointer-events: none;

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import type { ActiveTool, BlurMethod, FaceDetectionResult, LoadedImage, Rect, RectangleAction, RegionShape } from '../types'
+import type { ActiveTool, BlurMethod, FaceEntry, FaceDetectionResult, ImageEditState, LoadedImage, Rect, RectangleAction, RectEntry, RegionShape } from '../types'
 import { BLUR_SECURITY } from '../types'
 import { CanvasView } from './canvas-view'
 import { FaceList } from './face-list'
@@ -15,21 +15,11 @@ interface Props {
   image: LoadedImage
   onReset: () => void
   onNewImage: (img: LoadedImage) => void
-}
-
-interface FaceEntry {
-  face: FaceDetectionResult
-  visible: boolean
-  angle: number
-  shape: RegionShape
-}
-
-interface RectEntry {
-  rect: Rect
-  method: BlurMethod
-  angle: number
-  visible: boolean
-  shape: RegionShape
+  initialEditState?: ImageEditState | null
+  onEditStateChange?: (state: ImageEditState) => void
+  queuePosition?: { current: number; total: number } | null
+  onNavigate?: (direction: 'prev' | 'next') => void
+  onExportDone?: () => void
 }
 
 const METHODS: BlurMethod[] = ['mosaic', 'solid', 'solid-avg', 'gaussian']
@@ -40,7 +30,7 @@ function getSavedMethod(): BlurMethod {
   return (saved && METHODS.includes(saved as BlurMethod)) ? saved as BlurMethod : 'mosaic'
 }
 
-export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
+export function Editor({ image, onReset: _onReset, onNewImage, initialEditState, onEditStateChange, queuePosition, onNavigate, onExportDone }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -113,10 +103,23 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
     localStorage.setItem(LS_KEY, method)
   }, [method])
 
-  // Auto-detect faces on image load
+  // Restore edit state or auto-detect faces on image load
   useEffect(() => {
-    runDetection()
+    if (initialEditState) {
+      setDetectedFaces(initialEditState.faces)
+      setRectEntries(initialEditState.rects)
+      setRenderKey(k => k + 1)
+    } else {
+      setDetectedFaces([])
+      setRectEntries([])
+      runDetection()
+    }
   }, [image])
+
+  // Sync edit state to parent
+  useEffect(() => {
+    onEditStateChange?.({ faces: detectedFaces, rects: rectEntries, exported: false })
+  }, [detectedFaces, rectEntries])
 
   // Fit image to container on mount
   useEffect(() => {
@@ -269,6 +272,18 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
     }
   }
 
+  async function handleExportAndNext() {
+    setExporting(true)
+    try {
+      await exportImage(image, allActions, exportFormat)
+      onExportDone?.()
+    } catch (e) {
+      alert('Export failed: ' + (e instanceof Error ? e.message : String(e)))
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const allActions = useMemo(() => {
     const autoFaceActions = detectedFaces
       .filter(e => e.visible)
@@ -295,6 +310,37 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
       onDrop={onEditorDrop}
     >
       <div class="editor-layout">
+        {/* Navigation bar for multi-image */}
+        {queuePosition && queuePosition.total > 1 && (
+          <div class="editor-nav-bar">
+            <button
+              class="editor-nav-btn"
+              type="button"
+              disabled={queuePosition.current <= 1}
+              onClick={() => onNavigate?.('prev')}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              Prev
+            </button>
+            <span class="editor-nav-counter">
+              Image {queuePosition.current} of {queuePosition.total}
+            </span>
+            <button
+              class="editor-nav-btn"
+              type="button"
+              disabled={queuePosition.current >= queuePosition.total}
+              onClick={() => onNavigate?.('next')}
+            >
+              Next
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        )}
+
         {/* Canvas block */}
         <div class="editor-block editor-block--canvas">
         <div ref={containerRef} class="editor-canvas-area">
@@ -360,9 +406,20 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
                   <li>📍 All location data removed automatically</li>
                 </ul>
                 <div class="export-panel-actions">
-                  <button class="btn-primary export-panel-dl-btn" type="button" onClick={handleExportDownload} disabled={exporting}>
-                    {exporting ? 'Exporting…' : 'Download anonymized pic'}
-                  </button>
+                  {queuePosition && queuePosition.total > 1 && queuePosition.current < queuePosition.total ? (
+                    <>
+                      <button class="btn-primary export-panel-dl-btn" type="button" onClick={handleExportAndNext} disabled={exporting}>
+                        {exporting ? 'Exporting…' : 'Export & Next'}
+                      </button>
+                      <button class="btn-ghost export-panel-skip-btn" type="button" onClick={handleExportDownload} disabled={exporting}>
+                        Download only
+                      </button>
+                    </>
+                  ) : (
+                    <button class="btn-primary export-panel-dl-btn" type="button" onClick={handleExportDownload} disabled={exporting}>
+                      {exporting ? 'Exporting…' : 'Download anonymized pic'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -378,7 +435,7 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
-          <span>Drop to replace image</span>
+          <span>{queuePosition && queuePosition.total > 1 ? 'Drop to add images' : 'Drop to replace image'}</span>
         </div>
       )}
 
@@ -394,7 +451,7 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
             <div class="method-modal-list">
               {METHODS.map(m => {
                 const info = BLUR_SECURITY[m]
-                const dotColor = info.level === 'max' ? '#22c55e' : info.level === 'high' ? '#f59e0b' : '#b22222'
+                const dotColor = info.level === 'max' ? 'var(--color-success)' : info.level === 'high' ? 'var(--color-warning)' : 'var(--accent)'
                 return (
                   <button
                     key={m}
@@ -534,12 +591,12 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
           flex-shrink: 0;
         }
         .method-row-name {
-          font-size: 14px;
+          font-size: var(--fs-lg);
           color: var(--text-primary);
           font-weight: 500;
         }
         .method-row-level {
-          font-size: 11px;
+          font-size: var(--fs-sm);
           font-weight: 600;
           letter-spacing: 0.04em;
           text-transform: uppercase;
@@ -548,18 +605,18 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
         }
         .method-row-level--max {
           background: rgba(34,197,94,0.12);
-          color: #22c55e;
+          color: var(--color-success);
         }
         .method-row-level--high {
           background: rgba(245,158,11,0.12);
-          color: #f59e0b;
+          color: var(--color-warning);
         }
         .method-row-level--low {
           background: rgba(178,34,34,0.12);
           color: var(--accent-light);
         }
         .method-row-desc {
-          font-size: 12px;
+          font-size: var(--fs-base);
           color: var(--text-secondary);
           line-height: 1.45;
           margin: 0;
@@ -593,7 +650,7 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
           padding: var(--sp-sm) var(--sp-md) var(--sp-xs);
         }
         .method-section-title {
-          font-size: 14px;
+          font-size: var(--fs-lg);
           color: rgba(255,255,255,0.8);
           letter-spacing: 0.08em;
           font-weight: 500;
@@ -651,7 +708,7 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
           border-bottom: 1px solid var(--border);
         }
         .method-modal-title {
-          font-size: 16px;
+          font-size: var(--fs-2xl);
           font-weight: 600;
           color: var(--text-primary);
         }
@@ -674,7 +731,7 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
           padding: var(--sp-sm) var(--sp-md) var(--sp-xs);
         }
         .export-panel-title {
-          font-size: 14px;
+          font-size: var(--fs-lg);
           color: rgba(255,255,255,0.8);
           letter-spacing: 0.08em;
           font-weight: 500;
@@ -687,7 +744,7 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
           border: 1px solid var(--accent);
           border-radius: var(--radius);
           padding: var(--sp-sm) var(--sp-md);
-          font-size: 13px;
+          font-size: var(--fs-md);
           color: var(--text-secondary);
           margin: 0 var(--sp-md) var(--sp-md);
           line-height: 1.5;
@@ -695,7 +752,7 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
         .export-warning span:first-child {
           color: var(--accent-light);
           flex-shrink: 0;
-          font-size: 15px;
+          font-size: var(--fs-xl);
         }
         .export-panel-reassurance {
           list-style: none;
@@ -706,17 +763,59 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
           gap: 9px;
         }
         .export-panel-reassurance li {
-          font-size: 13px;
+          font-size: var(--fs-md);
           color: var(--text-secondary);
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: var(--sp-sm);
           line-height: 1.4;
         }
         .export-panel-actions .export-panel-dl-btn {
           width: 100%;
           padding: 10px 0;
-          font-size: 14px;
+          font-size: var(--fs-lg);
+        }
+        .editor-nav-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: var(--sp-sm) var(--sp-md);
+          background: var(--bg-surface);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+        }
+        .editor-nav-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--sp-xs);
+          background: var(--bg-elevated);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          padding: var(--sp-xs) var(--sp-sm);
+          cursor: pointer;
+          font-family: var(--font-sans);
+          font-size: var(--fs-md);
+          color: var(--text-secondary);
+          transition: border-color var(--transition), color var(--transition);
+        }
+        .editor-nav-btn:hover:not(:disabled) {
+          border-color: #555;
+          color: var(--text-primary);
+        }
+        .editor-nav-btn:disabled {
+          opacity: 0.35;
+          cursor: default;
+        }
+        .editor-nav-counter {
+          font-size: var(--fs-md);
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+        .export-panel-skip-btn {
+          width: 100%;
+          padding: 8px 0;
+          font-size: var(--fs-md);
+          margin-top: var(--sp-xs);
         }
         .editor-drop-overlay {
           position: absolute;
@@ -730,7 +829,7 @@ export function Editor({ image, onReset: _onReset, onNewImage }: Props) {
           justify-content: center;
           gap: var(--sp-md);
           color: #fff;
-          font-size: 16px;
+          font-size: var(--fs-2xl);
           font-weight: 500;
           pointer-events: none;
           border: 3px dashed var(--accent);
