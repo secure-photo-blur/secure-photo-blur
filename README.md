@@ -29,6 +29,10 @@ The whole thing is a static web page with no backend — you can switch to airpl
 - **Metadata stripping** — Canvas re-rendering inherently strips all EXIF/GPS data. No metadata survives export.
 - **Open source** — [source code on GitHub](https://github.com/secure-photo-blur/secure-photo-blur) for everyone to audit.
 
+## Languages
+
+English, Italian, German, French, Spanish — auto-detected from browser locale, switchable from the navbar.
+
 ## Supported formats
 
 JPEG, PNG, WebP, HEIC/HEIF. All EXIF/GPS metadata is automatically stripped on export.
