@@ -3,14 +3,17 @@ import { useContext, useState, useCallback, useMemo } from 'preact/hooks'
 import type { ComponentChildren } from 'preact'
 import { en } from './locales/en'
 import { it } from './locales/it'
+import { de } from './locales/de'
+import { fr } from './locales/fr'
+import { es } from './locales/es'
 
 export type TranslationKey = keyof typeof en
-export type Locale = 'en' | 'it'
+export type Locale = 'en' | 'it' | 'de' | 'fr' | 'es'
 
-const SUPPORTED_LOCALES: Locale[] = ['en', 'it']
+const SUPPORTED_LOCALES: Locale[] = ['en', 'it', 'de', 'fr', 'es']
 const LS_LOCALE_KEY = 'photoblur-locale'
 
-const dictionaries: Record<Locale, Record<string, string>> = { en, it }
+const dictionaries: Record<Locale, Record<string, string>> = { en, it, de, fr, es }
 
 function detectLocale(): Locale {
   try {

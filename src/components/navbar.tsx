@@ -9,7 +9,7 @@ interface NavbarProps {
   onReset?: () => void
 }
 
-const LOCALE_LABELS: Record<Locale, string> = { en: 'EN', it: 'IT' }
+const LOCALE_LABELS: Record<Locale, string> = { en: 'EN', it: 'IT', de: 'DE', fr: 'FR', es: 'ES' }
 
 export function Navbar({ phase, isMulti, onPhaseChange, onReset }: NavbarProps) {
   const { t, locale, setLocale } = useTranslation()
