@@ -11,12 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor != 'github-actions[bot]'
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Recreate main branch to overwrite pusher
+      - name: Update branch ref via API
         run: |
-          git checkout -b temp-main
-          git branch -D main
-          git checkout -b main
-          git push --force origin main
+          SHA="${{ github.sha }}"
+          # Delete and recreate the branch via GitHub API
+          # This makes github-actions[bot] the branch updater
+          curl -s -X DELETE \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/git/refs/heads/main"
+          curl -s -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/git/refs" \
+            -d "{\"ref\":\"refs/heads/main\",\"sha\":\"${SHA}\"}"
