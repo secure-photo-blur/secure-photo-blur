@@ -1,6 +1,6 @@
 # Secure Photo Blur
 
-**[Try it live](https://secure-photo-blur.claudiox.workers.dev/)**
+**[Try it live](https://securephotoblur.com/)**
 
 Privacy-first photo anonymization — offline, open-source, no personal data collected.
 
