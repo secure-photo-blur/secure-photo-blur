@@ -14,5 +14,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Force push to overwrite pusher
-        run: git push --force origin main
+      - name: Recreate main branch to overwrite pusher
+        run: |
+          git checkout -b temp-main
+          git branch -D main
+          git checkout -b main
+          git push --force origin main
