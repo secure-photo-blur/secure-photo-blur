@@ -26,6 +26,18 @@ export function FeedbackModal({ onClose }: Props) {
           </svg>
         </button>
 
+        <div class="feedback-tally-wrap">
+          <iframe
+            src="https://tally.so/embed/ja0e9E?alignLeft=1&hideTitle=1&transparentBackground=1"
+            width="100%"
+            height="240"
+            frameBorder={0}
+            title="Feedback form"
+          />
+        </div>
+
+        <p class="body-text feedback-or-text">{t('feedbackModal.or')}</p>
+
         <div class="feedback-contacts">
           <a class="body-text feedback-contact" href="mailto:hello@securephotoblur.com">
             <div class="feedback-contact-icon">
@@ -50,28 +62,6 @@ export function FeedbackModal({ onClose }: Props) {
               <span class="feedback-contact-value">@presence_</span>
             </div>
           </a>
-          <div class="feedback-anon-block">
-            <div class="feedback-contact-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-              </svg>
-            </div>
-            <div class="feedback-anon-right">
-              <div class="feedback-contact-text">
-                <span class="body-text feedback-contact-label">{t('feedbackModal.anonymous')}</span>
-                <span class="body-text feedback-contact-value">{t('feedbackModal.anonymousDesc')}</span>
-              </div>
-              <div class="feedback-tally-wrap">
-                <iframe
-                  src="https://tally.so/embed/681pb5?alignLeft=1&hideTitle=1&transparentBackground=1"
-                  width="100%"
-                  height="400"
-                  frameBorder={0}
-                  title="Feedback form"
-                />
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -152,29 +142,15 @@ export function FeedbackModal({ onClose }: Props) {
         .feedback-contact-value {
           color: var(--accent-light);
         }
-        .feedback-anon-block {
-          display: flex;
-          align-items: flex-start;
-          border: 1px solid var(--border);
-          border-radius: var(--radius);
-          padding: var(--sp-sm) 0 0 var(--sp-md);
-          gap: var(--sp-md);
-          color: var(--text-secondary);
-        }
-        .feedback-anon-right {
-          flex: 1;
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: var(--sp-sm);
-        }
         .feedback-tally-wrap {
           overflow: hidden;
         }
         .feedback-tally-wrap iframe {
           display: block;
-          margin-left: -6px;
-          width: calc(100% + 6px);
+        }
+        .feedback-or-text {
+          margin: var(--sp-md) 0 var(--sp-xs);
+          color: var(--text-muted);
         }
       `}</style>
     </div>

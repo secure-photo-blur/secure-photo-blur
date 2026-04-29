@@ -23,7 +23,7 @@ export const es = {
   'navbar.feedback': '¿Preguntas? ¿Feedback?',
   'navbar.feedback.aria': 'Enviar preguntas o comentarios',
   'feedbackModal.title': 'Contactarnos',
-  'feedbackModal.or': 'o escríbenos directamente',
+  'feedbackModal.or': 'o escríbeme directamente',
   'feedbackModal.email': 'Email',
   'feedbackModal.fetlife': 'DM en FetLife',
   'feedbackModal.anonymous': 'Feedback anónimo',
